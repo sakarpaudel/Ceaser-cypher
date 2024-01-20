@@ -7,14 +7,14 @@ def enter_message():
     mode = input("Would you like to encrypt (e) or decrypt (d)? : ").lower()
     
     while mode not in valid_modes:
-        print("Invalid Mode")
+        print("Error: Invalid Mode. Please enter 'e' for encrypt or 'd' for decrypt.")
         mode = input("Would you like to encrypt (e) or decrypt (d)?: ").lower()
 
     message = input("What message would you like to {} : ".format("encrypt" if mode == 'e' else "decrypt")).upper()
 
     shift = input("What is the shift number: ")
     while not shift.isdigit() or not (1 <= int(shift) <= 25):
-        print("Invalid Shift")
+        print("Error: Invalid Shift. Please enter a number between 1 and 25.")
         shift = input("What is the shift number: ")
 
     return mode, message, int(shift)
@@ -39,10 +39,13 @@ def decrypt(message, shift):
     return encrypt(message, -shift)
 
 def write_messages(messages):
-    with open("output.txt", "w") as file:
-        for message in messages:
-            file.write(message + "\n")
-    print("Messages written to 'output.txt' successfully.")
+    if messages:
+        with open("output.txt", "w") as file:
+            for message in messages:
+                file.write(message + "\n")
+        print("Messages written to 'output.txt' successfully.")
+    else:
+        print("No messages to write.")
 
 def is_file(filename):
     try:
@@ -54,13 +57,18 @@ def is_file(filename):
 
 def process_file(filename, mode):
     messages = []
-    with open(filename, 'r') as file:
-        for line in file:
-            message = line.strip()
-            if mode == 'e':
-                messages.append(encrypt(message, 1))
-            elif mode == 'd':
-                messages.append(decrypt(message, 1))
+    try:
+        with open(filename, 'r') as file:
+            for line in file:
+                message = line.strip()
+                if mode == 'e':
+                    messages.append(encrypt(message, 1))
+                elif mode == 'd':
+                    messages.append(decrypt(message, 1))
+    except FileNotFoundError:
+        print(f"Error: File '{filename}' not found.")
+    except Exception as e:
+        print(f"Error processing file: {e}")
     return messages
 
 def message_or_file():
@@ -68,7 +76,7 @@ def message_or_file():
     mode = input("Would you like to encrypt (e) or decrypt (d): ").lower()
 
     while mode not in valid_modes:
-        print("Invalid Mode")
+        print("Error: Invalid Mode. Please enter 'e' for encrypt or 'd' for decrypt.")
         mode = input("Would you like to encrypt (e) or decrypt (d): ").lower()
 
     source = input("Would you like to read from a file (f) or the console (c)? ").lower()
@@ -77,8 +85,12 @@ def message_or_file():
         message = input("What message would you like to {} : ".format("encrypt" if mode == 'e' else "decrypt")).upper()
         return mode, message, None
     elif source == 'f':
-        filename = input("Enter a filename: ")
-        return mode, None, filename
+        while True:
+            filename = input("Enter a filename: ")
+            if is_file(filename):
+                return mode, None, filename
+            else:
+                print(f"Error: File '{filename}' not found. Please enter a valid filename.")
 
 def main():
     welcome()
@@ -86,9 +98,10 @@ def main():
         mode, message, filename = message_or_file()
         shift = input("What is the shift number: ")
         while not shift.isdigit() or not (1 <= int(shift) <= 25):
-            print("Invalid Shift")
+            print("Error: Invalid Shift. Please enter a number between 1 and 25.")
             shift = input("What is the shift number: ")
 
+        messages = []
         if filename:
             messages = process_file(filename, mode)
             for result in messages:
@@ -108,4 +121,5 @@ def main():
             print("Thanks for using the program, goodbye!")
             break
 
-main()
+if __name__ == "__main__":
+    main()
