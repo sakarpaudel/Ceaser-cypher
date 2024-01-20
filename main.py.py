@@ -43,6 +43,7 @@ def write_messages(messages):
         for message in messages:
             file.write(message + "\n")
     print("Messages written to 'output.txt' successfully.")
+
 def is_file(filename):
     try:
         with open(filename, 'r'):
@@ -77,9 +78,6 @@ def message_or_file():
         return mode, message, None
     elif source == 'f':
         filename = input("Enter a filename: ")
-        while not is_file(filename):
-            print("Invalid Filename")
-            filename = input("Enter a filename: ")
         return mode, None, filename
 
 def main():
@@ -93,15 +91,19 @@ def main():
 
         if filename:
             messages = process_file(filename, mode)
+            for result in messages:
+                print(result)
         else:
-            messages = [encrypt(message, int(shift))] if mode == 'e' else [decrypt(message, int(shift))]
-
-        for result in messages:
-            print(result)
+            if mode == 'e':
+                encrypted_message = encrypt(message, int(shift))
+                print(f"\nEncrypted Message: {encrypted_message}")
+            elif mode == 'd':
+                decrypted_message = decrypt(message, int(shift))
+                print(f"\nDecrypted Message: {decrypted_message}")
 
         write_messages(messages)
 
-        another_message = input("Would you like to {} or decrypt another message? (y/n): ".format("encrypt" if mode == 'e' else "decrypt"))
+        another_message = input("\nWould you like to {} or decrypt another message? (y/n): ".format("encrypt" if mode == 'e' else "decrypt"))
         if another_message.lower() != 'y':
             print("Thanks for using the program, goodbye!")
             break
