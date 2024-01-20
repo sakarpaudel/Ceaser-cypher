@@ -68,6 +68,52 @@ def process_file():
     try:
         with open(fname, 'r') as f:
             data = f.read()
+        
+        action = input("\nDo you want to encrypt (e), decrypt (d), or exit (x)? : ").lower()
+        while action not in ('e', 'd', 'x'):
+            print("Invalid action. Please enter 'e' for encrypt, 'd' for decrypt, or 'x' to exit.")
+            action = input("Do you want to encrypt (e), decrypt (d), or exit (x)? : ").lower()
+
+        if action == 'e':
+            shift = input("What is the shift number: ")
+            while not shift.isdigit() or not (1 <= int(shift) <= 25):
+                print("Error: Shift value must be a number between 1 and 25. Try again.")
+                shift = input("What is the shift number: ")
+            
+            encrypted_data = encrypt(data, int(shift))
+            with open("output.txt", "w") as g:
+                g.write(encrypted_data)
+            
+            print("\nFile successfully encrypted. Encrypted content saved to 'output.txt'.\n")
+            end()
+
+        elif action == 'd':
+            shift = input("What is the shift number: ")
+            while not shift.isdigit() or not (1 <= int(shift) <= 25):
+                print("Error: Shift value must be a number between 1 and 25. Try again.")
+                shift = input("What is the shift number: ")
+            
+            decrypted_data = decrypt(data, int(shift))
+            with open("output.txt", "w") as g:
+                g.write(decrypted_data)
+            
+            print("\nFile successfully decrypted. Decrypted content saved to 'output.txt'.\n")
+            end()
+
+        elif action == 'x':
+            print("\nExiting file processing. Have a great day!\n")
+
+    except FileNotFoundError:
+        print('\nError: File not found! Please check your filename and path.')
+        process_file()
+    except IOError:
+        print('\nError: Could not read file. Please ensure the file is not corrupted.')
+        process_file()
+
+    fname = input('\nEnter the name of the file: ')
+    try:
+        with open(fname, 'r') as f:
+            data = f.read()
             encrypted_data = encrypt(data, 1)
 
         with open("output.txt", "w") as g:
@@ -77,8 +123,10 @@ def process_file():
 
     except FileNotFoundError:
         print('\nError: File not found! Please check your filename and path.')
+        process_file()
     except IOError:
         print('\nError: Could not read file. Please ensure the file is not corrupted.')
+        process_file()
 
 # Main function
 def main():
