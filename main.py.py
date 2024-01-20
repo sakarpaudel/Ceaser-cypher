@@ -1,148 +1,109 @@
-import time
-
-# Stylish welcome message
 def welcome():
-    print("\n--------------------------------------------------------")
-    print("|                Welcome to Caesar Cipher!              |")
-    print("| Encrypt and decrypt your messages with a touch of style |")
-    print("--------------------------------------------------------\n")
-    time.sleep(1)
-    input("Press Enter to Begin!")
+    print("Welcome to the Caesar Cipher")
+    print("This program encrypts and decrypts text using Caesar Cipher.")
 
-# Function to encrypt a message
+def enter_message():
+    valid_modes = {'e', 'd'}
+    mode = input("Would you like to encrypt (e) or decrypt (d)? : ").lower()
+    
+    while mode not in valid_modes:
+        print("Invalid Mode")
+        mode = input("Would you like to encrypt (e) or decrypt (d)?: ").lower()
+
+    message = input("What message would you like to {} : ".format("encrypt" if mode == 'e' else "decrypt")).upper()
+
+    shift = input("What is the shift number: ")
+    while not shift.isdigit() or not (1 <= int(shift) <= 25):
+        print("Invalid Shift")
+        shift = input("What is the shift number: ")
+
+    return mode, message, int(shift)
+
 def encrypt(message, shift):
     encrypted = ""
-    for char in message.upper():
+    for char in message:
         if char.isalpha():
-            shiftvalue = (ord(char) - 65 + shift) % 26 + 65
+            shiftvalue = ord(char) + shift
+            if char.islower():
+                if shiftvalue > ord('z'):
+                    shiftvalue -= 26
+            elif char.isupper():
+                if shiftvalue > ord('Z'):
+                    shiftvalue -= 26
             encrypted += chr(shiftvalue)
         else:
             encrypted += char
     return encrypted
 
-# Function to decrypt a message
 def decrypt(message, shift):
     return encrypt(message, -shift)
 
-# Exiting the program
-def end():
-    decide = input("\nWould you like to continue? (e: encrypt, d: decrypt, f: file, x: exit): ").lower()
-    while decide.lower() not in ('e', 'd', 'f', 'x'):
-        print("Please enter 'e' for encrypt, 'd' for decrypt, 'f' for file, or 'x' to exit.")
-        decide = input("Would you like to continue? (e: encrypt, d: decrypt, f: file, x: exit): ").lower()
-
-    if decide == 'e':
-        process_text('e')
-    elif decide == 'd':
-        process_text('d')
-    elif decide == 'f':
-        process_file()
-    elif decide == 'x':
-        print("\nThank you for experiencing Caesar Cipher! Have a fantastic day!\n")
-
-# Processing text input for encryption or decryption
-def process_text(mode):
-    if mode == "e":
-        message = input("\nEnter the text you want to encrypt: ")
-    elif mode == "d":
-        message = input("\nEnter the text you want to decrypt: ")
-
-    shift = input("What is the shift number: ")
-    while not shift.isdigit() or not (1 <= int(shift) <= 25):
-        print("Error: Shift value must be a number between 1 and 25. Try again.")
-        shift = input("What is the shift number: ")
-
-    print("\nProcessing...")
-    time.sleep(1)
-
-    if mode == "e":
-        print("\nThe Encrypted message is:", encrypt(message, int(shift)))
-    elif mode == "d":
-        print("\nThe Decrypted message is:", decrypt(message, int(shift)))
-
-    end()
-
-# Processing file input for encryption
-def process_file():
-    fname = input('\nEnter the name of the file: ')
+def write_messages(messages):
+    with open("output.txt", "w") as file:
+        for message in messages:
+            file.write(message + "\n")
+    print("Messages written to 'output.txt' successfully.")
+def is_file(filename):
     try:
-        with open(fname, 'r') as f:
-            data = f.read()
-        
-        action = input("\nDo you want to encrypt (e), decrypt (d), or exit (x)? : ").lower()
-        while action not in ('e', 'd', 'x'):
-            print("Invalid action. Please enter 'e' for encrypt, 'd' for decrypt, or 'x' to exit.")
-            action = input("Do you want to encrypt (e), decrypt (d), or exit (x)? : ").lower()
-
-        if action == 'e':
-            shift = input("What is the shift number: ")
-            while not shift.isdigit() or not (1 <= int(shift) <= 25):
-                print("Error: Shift value must be a number between 1 and 25. Try again.")
-                shift = input("What is the shift number: ")
-            
-            encrypted_data = encrypt(data, int(shift))
-            with open("output.txt", "w") as g:
-                g.write(encrypted_data)
-            
-            print("\nFile successfully encrypted. Encrypted content saved to 'output.txt'.\n")
-            end()
-
-        elif action == 'd':
-            shift = input("What is the shift number: ")
-            while not shift.isdigit() or not (1 <= int(shift) <= 25):
-                print("Error: Shift value must be a number between 1 and 25. Try again.")
-                shift = input("What is the shift number: ")
-            
-            decrypted_data = decrypt(data, int(shift))
-            with open("output.txt", "w") as g:
-                g.write(decrypted_data)
-            
-            print("\nFile successfully decrypted. Decrypted content saved to 'output.txt'.\n")
-            end()
-
-        elif action == 'x':
-            print("\nExiting file processing. Have a great day!\n")
-
+        with open(filename, 'r'):
+            pass
+        return True
     except FileNotFoundError:
-        print('\nError: File not found! Please check your filename and path.')
-        process_file()
-    except IOError:
-        print('\nError: Could not read file. Please ensure the file is not corrupted.')
-        process_file()
+        return False
 
-    fname = input('\nEnter the name of the file: ')
-    try:
-        with open(fname, 'r') as f:
-            data = f.read()
-            encrypted_data = encrypt(data, 1)
+def process_file(filename, mode):
+    messages = []
+    with open(filename, 'r') as file:
+        for line in file:
+            message = line.strip()
+            if mode == 'e':
+                messages.append(encrypt(message, 1))
+            elif mode == 'd':
+                messages.append(decrypt(message, 1))
+    return messages
 
-        with open("output.txt", "w") as g:
-            g.write(encrypted_data)
+def message_or_file():
+    valid_modes = {'e', 'd'}
+    mode = input("Would you like to encrypt (e) or decrypt (d): ").lower()
 
-        print("\nFile successfully encrypted. Encrypted content saved to 'output.txt'.\n")
+    while mode not in valid_modes:
+        print("Invalid Mode")
+        mode = input("Would you like to encrypt (e) or decrypt (d): ").lower()
 
-    except FileNotFoundError:
-        print('\nError: File not found! Please check your filename and path.')
-        process_file()
-    except IOError:
-        print('\nError: Could not read file. Please ensure the file is not corrupted.')
-        process_file()
+    source = input("Would you like to read from a file (f) or the console (c)? ").lower()
 
-# Main function
+    if source == 'c':
+        message = input("What message would you like to {} : ".format("encrypt" if mode == 'e' else "decrypt")).upper()
+        return mode, message, None
+    elif source == 'f':
+        filename = input("Enter a filename: ")
+        while not is_file(filename):
+            print("Invalid Filename")
+            filename = input("Enter a filename: ")
+        return mode, None, filename
+
 def main():
     welcome()
-    user_input = input("\nWould you like to encrypt (e), decrypt (d), process a file (f), or exit (x)? : ").lower()
+    while True:
+        mode, message, filename = message_or_file()
+        shift = input("What is the shift number: ")
+        while not shift.isdigit() or not (1 <= int(shift) <= 25):
+            print("Invalid Shift")
+            shift = input("What is the shift number: ")
 
-    while user_input not in ('e', 'd', 'f', 'x'):
-        print("Invalid input. Please enter 'e' for encrypt, 'd' for decrypt, 'f' for file, or 'x' to exit.")
-        user_input = input("\nWould you like to encrypt (e), decrypt (d), process a file (f), or exit (x)? : ").lower()
+        if filename:
+            messages = process_file(filename, mode)
+        else:
+            messages = [encrypt(message, int(shift))] if mode == 'e' else [decrypt(message, int(shift))]
 
-    if user_input == "e" or user_input == "d":
-        process_text(user_input)
-    elif user_input == "f":
-        process_file()
-    elif user_input == "x":
-        print("\nThank you for experiencing Caesar Cipher! Have a fantastic day!\n")
+        for result in messages:
+            print(result)
 
-# Running the main function
+        write_messages(messages)
+
+        another_message = input("Would you like to {} or decrypt another message? (y/n): ".format("encrypt" if mode == 'e' else "decrypt"))
+        if another_message.lower() != 'y':
+            print("Thanks for using the program, goodbye!")
+            break
+
 main()
